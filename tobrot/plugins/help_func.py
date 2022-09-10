@@ -9,17 +9,20 @@
 
 from os import path as opath
 from time import time
+from telegraph import upload_file
 from subprocess import check_output
 from psutil import disk_usage, cpu_percent, swap_memory, cpu_count, virtual_memory, net_io_counters, boot_time
-from pyrogram import enums
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
+from pyrogram import enums, Client
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, Message
 
 from tobrot import *
 from tobrot.helper_funcs.display_progress import humanbytes, TimeFormatter
 from tobrot.bot_theme.themes import BotTheme
 from tobrot.plugins import getUserOrChaDetails
 
-async def stats(client, message):
+TGH_LIMIT = 5242880*2
+
+async def stats(client: Client, message: Message):
     user_id, _ = getUserOrChaDetails(message)
     stats = (BotTheme(user_id)).STATS_MSG_1
     if opath.exists('.git'):
@@ -75,7 +78,7 @@ async def stats(client, message):
         disable_web_page_preview=True
     )
 
-async def help_message_f(client, message):
+async def help_message_f(client: Client, message: Message):
     user_id, _ = getUserOrChaDetails(message)
     reply_markup = InlineKeyboardMarkup(
         [[InlineKeyboardButton("🆘️ Open Help 🆘️", callback_data = "openHelp_pg1")]]
@@ -89,7 +92,7 @@ async def help_message_f(client, message):
         disable_web_page_preview=True
     )
 
-async def user_settings(client, message):
+async def user_settings(client: Client, message: Message):
 
     uid, _ = getUserOrChaDetails(message)
     to_edit = await message.reply_text('Fetching your Details . . .')
@@ -137,3 +140,41 @@ async def settings_callback(client, query: CallbackQuery):
 ┗━━━━━━━━━━━━━━━━━━╹'''
 
             await query.edit_message_media(media=InputMediaPhoto(media=thumb_path, caption=_text))
+
+async def picture_add(client: Client, message: Message):
+    '''/addpic command'''
+    editable = await message.reply_text("Checking Input ...")
+    resm = message.reply_to_message
+    if resm.text.startswith("http"):
+        pic_add = resm.text.stripe()
+        await editable.edit("Adding your Link ...")
+    elif resm.photo:
+        if not ((resm.photo and resm.photo.file_size <= TGH_LIMIT)):
+            await editable.edit("This Media is Not Supported! Only Send Photos !!")
+            return
+        await editable.edit("Uploading to te.legra.ph Server ...")
+        df = await client.download_media(
+            message=resm,
+            file_name=f'{DOWNLOAD_LOCATION}/thumbnails'
+        )
+        await editable.edit("`Uploading to te.legra.ph Please Wait....`")
+        try:
+            tgh_post = upload_file(df)
+            pic_add = f'https://te.legra.ph{tgh_post[0]}'
+        except Exception as err:
+            await editable.edit(err)
+        finally:
+            os.remove(df)
+    PICS_LIST.append(pic_add)
+    await editable.delete()
+    message.reply_text("Added to Existing Random Pictures Status List!")
+
+async def picture_rm(client: Client, message: Message):
+    '''/rmpic command'''
+    to_edit = await message.reply_text("Finding your Image ...")
+    
+    
+    await to_edit.edit("Removed from Existing Random Pictures Status List!")
+
+    
+
