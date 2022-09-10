@@ -11,6 +11,7 @@ import sys
 
 from datetime import datetime
 from math import floor
+from random import choice
 from asyncio import sleep as asleep, subprocess, create_subprocess_shell
 from io import BytesIO, StringIO
 from os import path as opath, remove as oremove
@@ -20,28 +21,13 @@ from traceback import format_exc
 from psutil import virtual_memory, cpu_percent, net_io_counters
 
 from pyrogram.errors import FloodWait, MessageIdInvalid, MessageNotModified
-from pyrogram import enums
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram import enums, Client
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, Message
 from tobrot.plugins import getUserOrChaDetails, getUserName
 from tobrot.helper_funcs.admin_check import AdminCheck
-from tobrot import (
-    AUTH_CHANNEL,
-    BOT_START_TIME,
-    LOGGER,
-    MAX_MESSAGE_LENGTH, 
-    user_specific_config,
-    gid_dict,
-    _lock,
-    EDIT_SLEEP_TIME_OUT,
-    FINISHED_PROGRESS_STR,
-    UN_FINISHED_PROGRESS_STR,
-    UPDATES_CHANNEL,
-    LOG_FILE_NAME,
-    DB_URI,
-    user_settings,
-    bot,
-    HALF_FINISHED
-    )
+from tobrot import AUTH_CHANNEL, BOT_START_TIME, LOGGER, MAX_MESSAGE_LENGTH, user_specific_config, \
+                   gid_dict, _lock, EDIT_SLEEP_TIME_OUT, FINISHED_PROGRESS_STR, UN_FINISHED_PROGRESS_STR, \
+                   UPDATES_CHANNEL, LOG_FILE_NAME, DB_URI, user_settings, HALF_FINISHED, PICS_LIST
 from tobrot.helper_funcs.display_progress import humanbytes, TimeFormatter
 from tobrot.helper_funcs.download_aria_p_n import aria_start
 from tobrot.helper_funcs.upload_to_tg import upload_to_tg
@@ -99,10 +85,10 @@ def bot_button_stats():
 ┃ ᗪIՏK: {progress_bar(used_percent)} {int(used_percent)}%
 ┗━━━━━━━━━━━━━━━━╹'''
 
-async def status_message_f(client, message):
+async def status_message_f(client: Client, message: Message):
     u_id_, u_tag = getUserOrChaDetails(message)
     aria_i_p = await aria_start()
-    to_edit = await message.reply("🧭 𝐆𝐞𝐭𝐭𝐢𝐧𝐠 𝐂𝐮𝐫𝐫𝐞𝐧𝐭 𝐒𝐭𝐚𝐭𝐮𝐬 . .")
+    to_edit = await message.reply_photo(photo=choice(PICS_LIST) ,caption="🧭 𝐆𝐞𝐭𝐭𝐢𝐧𝐠 𝐂𝐮𝐫𝐫𝐞𝐧𝐭 𝐒𝐭𝐚𝐭𝐮𝐬 . .") if PICS_LIST else await message.reply("🧭 𝐆𝐞𝐭𝐭𝐢𝐧𝐠 𝐂𝐮𝐫𝐫𝐞𝐧𝐭 𝐒𝐭𝐚𝐭𝐮𝐬 . .")
     chat_id = int(message.chat.id)
     mess_id = int(to_edit.id)
     async with _lock:
@@ -172,7 +158,7 @@ async def status_message_f(client, message):
 
         ms_g = (BotTheme(u_id_)).BOTTOM_STATUS_MSG
         if UPDATES_CHANNEL:
-            ms_g += f"\n♦️ℙ𝕠𝕨𝕖𝕣𝕖𝕕 𝔹𝕪 {UPDATES_CHANNEL}♦️"
+            ms_g += f"\n♦️ ℙ𝕠𝕨𝕖𝕣𝕖𝕕 𝔹𝕪 {UPDATES_CHANNEL}♦️"
         umen = f'<a href="tg://user?id={u_id_}">{u_tag}</a>'
         mssg = ((BotTheme(u_id_)).TOP_STATUS_MSG).format(
             umen = umen,
@@ -186,7 +172,8 @@ async def status_message_f(client, message):
         if msg == "":
             msg = (BotTheme(u_id_)).DEF_STATUS_MSG
             msg = mssg + "\n" + msg + "\n" + ms_g
-            await to_edit.edit(msg, reply_markup=button_markup)
+            if PICS_LIST: await client.edit_message_media(chat_id=to_edit.chat.id, message_id=to_edit.id, media=InputMediaPhoto(media=choice(PICS_LIST), caption=msg), reply_markup=button_markup)
+            else: await to_edit.edit(msg, reply_markup=button_markup)
             await asleep(EDIT_SLEEP_TIME_OUT)
             await to_edit.delete()
             break
@@ -202,7 +189,8 @@ async def status_message_f(client, message):
         else:
             if msg != prev_mess:
                 try:
-                    await to_edit.edit(msg, parse_mode=enums.ParseMode.HTML, reply_markup=button_markup)
+                    if PICS_LIST: await to_edit.edit_caption(caption=msg, parse_mode=enums.ParseMode.HTML, reply_markup=button_markup)
+                    else: await to_edit.edit(msg, parse_mode=enums.ParseMode.HTML, reply_markup=button_markup)
                 except MessageIdInvalid:
                     break
                 except MessageNotModified as ep:
