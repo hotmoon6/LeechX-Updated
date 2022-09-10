@@ -8,11 +8,12 @@
 # All Right Reserved
 
 import logging
-import os
-import shutil
-import datetime
-import requests
-import heroku3
+from pytz import timezone
+from os import path as opath, makedirs, remove as oremove, execl
+from shutil import rmtree
+from datetime import datetime
+from requests import get as rget
+from heroku3 import from_key as from_apikey
 
 from pyrogram import enums
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
@@ -22,30 +23,10 @@ from sys import executable
 from subprocess import run as srun
 
 from tobrot import HEROKU_API_KEY, HEROKU_APP_NAME, app, bot, __version__
-from tobrot import (
-    OWNER_ID,
-    SUDO_USERS,
-    AUTH_CHANNEL,
-    DOWNLOAD_LOCATION,
-    GET_SIZE_G,
-    GLEECH_COMMAND,
-    GLEECH_UNZIP_COMMAND,
-    GLEECH_ZIP_COMMAND,
-    LOGGER,
-    RENEWME_COMMAND,
-    TELEGRAM_LEECH_UNZIP_COMMAND,
-    TELEGRAM_LEECH_COMMAND,
-    UPLOAD_COMMAND,
-    GYTDL_COMMAND,
-    GPYTDL_COMMAND,
-    RCLONE_COMMAND,
-    UPDATES_CHANNEL,
-    LEECH_LOG,
-    STRING_SESSION,
-    SET_BOT_COMMANDS,
-    RDM_QUOTE,
-    INDEX_SCRAPE
-)
+from tobrot import OWNER_ID, SUDO_USERS, AUTH_CHANNEL, DOWNLOAD_LOCATION, GET_SIZE_G, GLEECH_COMMAND, \
+                   GLEECH_UNZIP_COMMAND, GLEECH_ZIP_COMMAND, LOGGER, RENEWME_COMMAND, TELEGRAM_LEECH_UNZIP_COMMAND, \
+                   TELEGRAM_LEECH_COMMAND, UPLOAD_COMMAND, GYTDL_COMMAND, GPYTDL_COMMAND, RCLONE_COMMAND, \
+                   UPDATES_CHANNEL, LEECH_LOG, STRING_SESSION, SET_BOT_COMMANDS, RDM_QUOTE, INDEX_SCRAPE, TIMEZONE
 if STRING_SESSION:
     from tobrot import userBot
 from tobrot.helper_funcs.download import down_load_media_f
@@ -62,25 +43,14 @@ from tobrot.helper_funcs.bot_commands import BotCommands
 from tobrot.database.db_func import DatabaseManager
 from tobrot.plugins.choose_rclone_config import rclone_command_f
 from tobrot.plugins.custom_thumbnail import clear_thumb_nail, save_thumb_nail
-from tobrot.plugins.incoming_message_fn import (g_clonee, g_yt_playlist,
-                                                incoming_message_f,
-                                                incoming_purge_message_f,
-                                                incoming_youtube_dl_f,
-                                                rename_tg_file)
-from tobrot.plugins.help_func import help_message_f, stats, user_settings, settings_callback
+from tobrot.plugins.incoming_message_fn import g_clonee, g_yt_playlist, incoming_message_f, incoming_purge_message_f, \
+                                               incoming_youtube_dl_f, rename_tg_file
+from tobrot.plugins.help_func import help_message_f, stats, user_settings, settings_callback, picture_add
 from tobrot.plugins.speedtest import get_speed
 from tobrot.plugins.mediainfo import mediainfo
 from tobrot.plugins.rclone_size import check_size_g, g_clearme
-from tobrot.plugins.status_message_fn import (
-    cancel_message_f,
-    eval_message_f,
-    exec_message_f,
-    status_message_f,
-    upload_document_f,
-    upload_log_file,
-    upload_as_doc,
-    upload_as_video
-)
+from tobrot.plugins.status_message_fn import cancel_message_f, eval_message_f, exec_message_f, status_message_f, \
+                                             upload_document_f, upload_log_file, upload_as_doc, upload_as_video
 
 botcmds = [
         BotCommand(f'{BotCommands.LeechCommand}', '📨 [Reply] Leech any Torrent/ Magnet/ Direct Link '),
@@ -149,7 +119,7 @@ async def clean_all():
     aria2 = await aria_start()
     aria2.remove_all(True)
     try:
-        shutil.rmtree(DOWNLOAD_LOCATION)
+        rmtree(DOWNLOAD_LOCATION)
     except FileNotFoundError:
         pass
 
@@ -173,13 +143,13 @@ async def restart(client, message:Message):
         app.stop()
         if STRING_SESSION:
             userBot.stop()
-        heroku_conn = heroku3.from_key(HEROKU_API_KEY)
+        heroku_conn = from_apikey(HEROKU_API_KEY)
         appx = heroku_conn.app(HEROKU_APP_NAME)
         appx.restart()
     elif dynoKill:
         LOGGER.info("[HEROKU] Killing Dyno...")
         await message.reply_text("__Killed Dyno__")
-        heroku_conn = heroku3.from_key(HEROKU_API_KEY)
+        heroku_conn = from_apikey(HEROKU_API_KEY)
         appx = heroku_conn.app(HEROKU_APP_NAME)
         proclist = appx.process_formation()
         for po in proclist:
@@ -196,33 +166,39 @@ async def restart(client, message:Message):
         with open(".restartmsg", "w") as f:
             f.truncate(0)
             f.write(f"{restart_message.chat.id}\n{restart_message.id}\n")
-        os.execl(executable, executable, "-m", "tobrot")
+        execl(executable, executable, "-m", "tobrot")
 
 if __name__ == "__main__":
     # Generat Download Directory, if Not Exist !!
-    if not os.path.isdir(DOWNLOAD_LOCATION):
-        os.makedirs(DOWNLOAD_LOCATION)
+    if not opath.isdir(DOWNLOAD_LOCATION):
+        makedirs(DOWNLOAD_LOCATION)
 
     # Start The Bot >>>>>>>
     for a in app:
         a.start()
 
     # Bot Restart & Restart Message >>>>>>>>
-    utc_now = datetime.datetime.utcnow()
-    ist_now = utc_now + datetime.timedelta(minutes=30, hours=5)
-    ist = ist_now.strftime("<b>📆 𝘿𝙖𝙩𝙚 :</b> <code>%d %B, %Y</code> \n<b>⏰ 𝙏𝙞𝙢𝙚 :</b> <code>%I:%M:%S %p (GMT+05:30)</code>") #Will Fix to Time Zone Format
-    if os.path.isfile(".restartmsg"):
+    curr = datetime.now(timezone(TIMEZONE))
+    date = curr.strftime('%d %B, %Y')
+    time = curr.strftime('%I:%M:%S %p')
+    if opath.isfile(".restartmsg"):
         with open(".restartmsg") as f:
             chat_id, msg_id = map(int, f)
         for a in app:
             a.edit_message_text("Restarted & Updated Successfully!", chat_id, msg_id)
-        os.remove(".restartmsg")
+        oremove(".restartmsg")
     elif OWNER_ID:
         try:
-            text = f"<b>Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ !!</b>\n\n{ist}\n\n<b>ℹ️ 𝙑𝙚𝙧𝙨𝙞𝙤𝙣 :</b> <code>{__version__}</code>"
+            text = f'''<b>Bᴏᴛ Rᴇsᴛᴀʀᴛᴇᴅ !!</b>
+
+<b>📆 𝘿𝙖𝙩𝙚 :</b> <code>{date}</code> 
+<b>⏰ 𝙏𝙞𝙢𝙚 :</b> <code>{time}</code>
+<b>🚦 𝙏𝙞𝙢𝙚𝙕𝙤𝙣𝙚 :</b> <code>{TIMEZONE}</code>
+
+<b>ℹ️ 𝙑𝙚𝙧𝙨𝙞𝙤𝙣 :</b> <code>{__version__}</code>'''
             if RDM_QUOTE:
                 try:
-                    qResponse = requests.get("https://quote-garden.herokuapp.com/api/v3/quotes/random")
+                    qResponse = rget("https://quote-garden.herokuapp.com/api/v3/quotes/random")
                     if qResponse.status_code == 200:
                         qData = qResponse.json() 
                         qText = qData['data'][0]['quoteText']
