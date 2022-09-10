@@ -253,6 +253,7 @@ LEECH_INVITE = getVar("LEECH_INVITE", "False")
 EX_LEECH_LOG = [int(chats) if (' ' not in getVar('EX_LEECH_LOG', '')) else int(chats) for chats in getVar('EX_LEECH_LOG', '').split()]
 EXCEP_CHATS = getVar("EXCEP_CHATS", "")
 BOT_PM = getVar("BOT_PM", False)
+PICS_LIST = (getVar("PICS", "")).split()
 
 # 4 GB Upload Utils >>>>>>>>>>>
 PRM_USERS = getVar("PRM_USERS", "") #Optional 
