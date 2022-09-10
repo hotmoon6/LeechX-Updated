@@ -265,7 +265,8 @@ BOT_THEME = getVar("BOT_THEME", "fx-optimised-theme")
 # ForceSubscribe [ Channel ] >>>>>>>>
 FSUB_CHANNEL = getVar("FSUB_CHANNEL", "") #Do Not Put this Now
 
-# Quotes in Restart Message >>>>>>>>
+# Quotes in Restart Message & Utils >>>>>>>>
+TIMEZONE = getVar("TIMEZONE", "Asia/Kolkata")
 RDM_QUOTE = getVar("RDM_QUOTE", True)
 
 # Database Handler >>>>>>>>
