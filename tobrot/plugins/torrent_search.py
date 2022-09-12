@@ -316,7 +316,7 @@ RESULT_STR_RARBG = (
     "⊗Name: `{Name}`\n"
     "⊗Size: {Size}\n"
     "⊗Seeders: {Seeders} || ⊗Leechers: {Leechers}\n"
-    "⊗File Url: {Url}
+    "⊗File Url: `{Url}`"
 )
 RESULT_STR_ALL = (
     "❖Name: `{Name}`\n"
