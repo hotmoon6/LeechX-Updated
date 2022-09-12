@@ -315,7 +315,8 @@ RESULT_STR_TORLOCK = (
 RESULT_STR_RARBG = (
     "⊗Name: `{Name}`\n"
     "⊗Size: {Size}\n"
-    "⊗Seeders: {Seeders} || ⊗Leechers: {Leechers}"
+    "⊗Seeders: {Seeders} || ⊗Leechers: {Leechers}\n"
+    "⊗File Url: {Url}
 )
 RESULT_STR_ALL = (
     "❖Name: `{Name}`\n"
