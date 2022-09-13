@@ -209,7 +209,7 @@ class TorrentSearch:
         else:
             magnet = values.get('magnet', values.get('Magnet'))  # Avoid updating source dict
             if magnet:
-                extra += f"Sorry ! RARBG Currently not allow the Direct Torrenting Facility.\nNote: Use Vpn to Open Above Link"
+                extra += f"⚡Magnet: `{self.format_magnet(magnet)}`"
         if (extra):
             string += "\n" + extra
         return string
@@ -316,7 +316,8 @@ RESULT_STR_RARBG = (
     "⊗Name: `{Name}`\n"
     "⊗Size: {Size}\n"
     "⊗Seeders: {Seeders} || ⊗Leechers: {Leechers}\n"
-    "⊗File Url: {Url}"
+    "⊗File Url: {Url}\n"
+    "Sorry ! RARBG Currently not allow the Direct Torrenting Facility.\n\nNote: Use Vpn to Open Above Link"
 )
 RESULT_STR_ALL = (
     "❖Name: `{Name}`\n"
