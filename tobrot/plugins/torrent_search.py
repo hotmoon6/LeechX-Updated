@@ -318,7 +318,7 @@ RESULT_STR_RARBG = (
     "⊗Size: {Size}\n"
     "⊗Seeders: {Seeders} || ⊗Leechers: {Leechers}\n"
     "⊗File Url: {Url}\n"
-    "Sorry ! RARBG Currently not allow the Direct Torrenting Facility.\n\nNote: Use Vpn to Open Above Link"
+    "Sorry ! Magnet 🧲 Not Found.\n\n<i>Note: Use Vpn to Open Above Link</i>"
 )
 RESULT_STR_ALL = (
     "❖Name: `{Name}`\n"
