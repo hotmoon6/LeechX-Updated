@@ -228,7 +228,7 @@ class TorrentSearch:
 
         res_lim = min(self.RESULT_LIMIT, len(self.response) - self.RESULT_LIMIT*self.index)
         result = f"**Page - {self.index+1}**\n\n"
-        result += "\n\n≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡\n\n".join(
+        result += "\n\n▱▰▱▰▱▰▱▰▱▰▱▰▱▰\n\n".join(
             self.get_formatted_string(self.response[self.response_range[self.index]+i])
             for i in range(res_lim)
         )
@@ -280,9 +280,9 @@ class TorrentSearch:
         await self.update_message()
 
 RESULT_STR_1337 = (
-    "✘Name: `{Name}`\n"
-    "✘Size: {Size}\n"
-    "✘Seeders: {Seeders} || ✘Leechers: {Leechers}"
+    "📀Name: `{Name}`\n"
+    "🌀Size: {Size}\n"
+    "🌱Seeders: {Seeders} || ✘Leechers: {Leechers}"
 )
 RESULT_STR_PIRATEBAY = (
     "➲Name: `{Name}`\n"
@@ -295,13 +295,13 @@ RESULT_STR_TGX = (
     "⇒Seeders: {Seeders} || ⇒Leechers: {Leechers}"
 )
 RESULT_STR_YTS = (
-    "❂Name: `{Name}`\n"
-    "❂Released on: {ReleasedDate}\n"
-    "❂Genre: {Genre}\n"
-    "❂Rating: {Rating}\n"
-    "❂Likes: {Likes}\n"
-    "❂Duration: {Runtime}\n"
-    "❂Language: {Language}"
+    "📀 Name: `{Name}`\n"
+    "🌀 Released on: {ReleasedDate}\n"
+    "👣 Genre: {Genre}\n"
+    "⭐ Rating: {Rating}\n"
+    "💌 Likes: {Likes}\n"
+    "⏳ Duration: {Runtime}\n"
+    "🍂 Language: {Language}"
 )
 RESULT_STR_EZTV = (
     "★Name: `{Name}`\n"
@@ -314,11 +314,11 @@ RESULT_STR_TORLOCK = (
     "✿Seeders: {Seeders} || ✿Leechers: {Leechers}"
 )
 RESULT_STR_RARBG = (
-    "⊗Name: `{Name}`\n"
-    "⊗Size: {Size}\n"
-    "⊗Seeders: {Seeders} || ⊗Leechers: {Leechers}\n"
-    "⊗File Url: {Url}\n"
-    "Sorry ! Magnet 🧲 Not Found.\n\n<i>Note: Use Vpn to Open Above Link</i>"
+    "📀 Name: `{Name}`\n"
+    "🌀 Size: {Size}\n"
+    "🌱 Seeders: {Seeders} || ⊗Leechers: {Leechers}\n"
+    "🧲 File Url: {Url}\n"
+    "Sorry ! Magnet Not Found.\n\n<i>Note: Use Vpn to Open Above Link</i>"
 )
 RESULT_STR_ALL = (
     "❖Name: `{Name}`\n"
@@ -358,6 +358,6 @@ async def searchhelp(self, message):
 ┃• /rarbg <i>[search query]</i>
 ┃• /ts <i>[search query]</i>
 ┃
-┗━♦️ℙ𝕠𝕨𝕖𝕣𝕖𝕕 𝔹𝕪 @FuZionX♦️━╹
+┗━♦️ℙ𝕠𝕨𝕖𝕣𝕖𝕕 𝔹𝕪 Sadie♦️━╹
 '''
     await message.reply(text=help_string, parse_mode=enums.ParseMode.HTML)
