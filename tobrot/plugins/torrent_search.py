@@ -238,7 +238,7 @@ class TorrentSearch:
             result,
             reply_markup=InlineKeyboardMarkup([inline]),
             parse_mode=enums.ParseMode.MARKDOWN,
-            link_preview=false,
+            disable_web_page_preview,
         )
 
     async def find(self, client, message):
